@@ -62,10 +62,10 @@ public class Restaurante
      */
     public Restaurante( )
     {
-        pedidos = new ArrayList<Pedido>( );
-        ingredientes = new ArrayList<Ingrediente>( );
-        menuBase = new ArrayList<ProductoMenu>( );
-        menuCombos = new ArrayList<Combo>( );
+        this.pedidos = new ArrayList<Pedido>( );
+        this.ingredientes = new ArrayList<Ingrediente>( );
+        this.menuBase = new ArrayList<ProductoMenu>( );
+        this.menuCombos = new ArrayList<Combo>( );
     }
 
     // ***************************************
@@ -172,7 +172,7 @@ public class Restaurante
         cargarCombos( archivoCombos );
     }
 
-    private void cargarIngredientes( File archivoIngredientes ) throws IngredienteRepetidoException, IOException
+    public void cargarIngredientes( File archivoIngredientes ) throws IngredienteRepetidoException, IOException
     {
         BufferedReader reader = new BufferedReader( new java.io.FileReader( archivoIngredientes ) );
         try
@@ -209,7 +209,7 @@ public class Restaurante
         }
     }
 
-    private void cargarMenu( File archivoMenu ) throws ProductoRepetidoException, IOException
+    public void cargarMenu( File archivoMenu ) throws ProductoRepetidoException, IOException
     {
         BufferedReader reader = new BufferedReader( new java.io.FileReader( archivoMenu ) );
         try
@@ -246,7 +246,7 @@ public class Restaurante
         }
     }
 
-    private void cargarCombos( File archivoCombos ) throws ProductoRepetidoException, ProductoFaltanteException, IOException
+    public void cargarCombos( File archivoCombos ) throws ProductoRepetidoException, ProductoFaltanteException, IOException
     {
         BufferedReader reader = new BufferedReader( new java.io.FileReader( archivoCombos ) );
         try

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -14,7 +15,10 @@ import org.junit.jupiter.api.Test;
 
 import uniandes.dpoo.hamburguesas.excepciones.HamburguesaException;
 import uniandes.dpoo.hamburguesas.excepciones.NoHayPedidoEnCursoException;
+import uniandes.dpoo.hamburguesas.excepciones.ProductoFaltanteException;
+import uniandes.dpoo.hamburguesas.excepciones.ProductoRepetidoException;
 import uniandes.dpoo.hamburguesas.excepciones.YaHayUnPedidoEnCursoException;
+import uniandes.dpoo.hamburguesas.excepciones.IngredienteRepetidoException;
 import uniandes.dpoo.hamburguesas.mundo.Combo;
 import uniandes.dpoo.hamburguesas.mundo.Ingrediente;
 import uniandes.dpoo.hamburguesas.mundo.Pedido;
@@ -24,8 +28,6 @@ import uniandes.dpoo.hamburguesas.mundo.Restaurante;
 public class RestauranteTest {
 	
 	private Restaurante restaurante;
-	private Pedido pedido;
-	private Pedido antePedido; 
 	private Pedido pedidoCurso;
 	ArrayList<ProductoMenu> listaMenuEsperada;
 	ArrayList<Combo> listaCombosEsperada;
@@ -35,8 +37,6 @@ public class RestauranteTest {
 	@BeforeEach
     public void setUp() throws Exception {
         restaurante = new Restaurante();
-        pedido = new Pedido("Maria", "Soacha");
-        antePedido = new Pedido("Jose", "Sutatenza");
     }
 	
 	@Test
@@ -103,7 +103,6 @@ public class RestauranteTest {
 		
 		ProductoMenu item;
 		Combo combo;
-		Ingrediente ingr;
 		
 		item = new ProductoMenu("Hamburguesa base", 14000);
 		listaMenuEsperada.add(item);
@@ -141,17 +140,18 @@ public class RestauranteTest {
 	void verificarCargaCompletaDeDatos() throws IOException, NumberFormatException, HamburguesaException {
 		prepararDatosDePrueba();
 
-		File archivoIngr = new File("./dataingredientes_test.txt");
-		File archivoProductos = new File("tests/uniandes/dpoo/hamburguesas/tests/datosPrueba/menu_test.txt");
-		File archivoCombos = new File("tests/uniandes/dpoo/hamburguesas/tests/datosPrueba/combos_test.txt");
+		File ingredientesFile = new File("./data/ingredientes_test.txt");
+		System.out.println("Existe archivo ingredientes? " + ingredientesFile.exists());
 
-		rest1.cargarInformacionRestaurante(archivoIngr, archivoProductos, archivoCombos);
+		File combosFile = new File("./data/combos_test.txt");
+		File menuFile = new File("./data/menu_test.txt");
 
-		ArrayList<Ingrediente> ingredientesCargados = rest1.getIngredientes();
-		ArrayList<ProductoMenu> menuCargado = rest1.getMenuBase();
-		ArrayList<Combo> combosCargados = rest1.getMenuCombos();
-
-		// Validación de ingredientes
+		restaurante.cargarInformacionRestaurante(ingredientesFile, menuFile, combosFile);
+		
+		ArrayList<ProductoMenu> menuCargado = restaurante.getMenuBase();
+		ArrayList<Combo> combosCargados = restaurante.getMenuCombos();
+		ArrayList<Ingrediente> ingredientesCargados = restaurante.getIngredientes();
+		
 		assertEquals(listaIngredientesEsperada.size(), ingredientesCargados.size(), "Número incorrecto de ingredientes");
 
 		for (int i = 0; i < ingredientesCargados.size(); i++) {
@@ -161,7 +161,6 @@ public class RestauranteTest {
 			assertEquals(esperado.getCostoAdicional(), cargado.getCostoAdicional(), "Costo adicional del ingrediente incorrecto");
 		}
 
-		// Validación de productos del menú
 		assertEquals(listaMenuEsperada.size(), menuCargado.size(), "Cantidad incorrecta de productos en el menú");
 
 		for (int i = 0; i < menuCargado.size(); i++) {
@@ -171,7 +170,6 @@ public class RestauranteTest {
 			assertEquals(esperado.getPrecio(), cargado.getPrecio(), "Precio de producto incorrecto");
 		}
 
-		// Validación de combos
 		assertEquals(listaCombosEsperada.size(), combosCargados.size(), "Cantidad incorrecta de combos");
 
 		for (int i = 0; i < combosCargados.size(); i++) {
@@ -181,6 +179,60 @@ public class RestauranteTest {
 			assertEquals(esperado.getPrecio(), cargado.getPrecio(), "Precio de combo incorrecto");
 		}
 	}
+	
+	@Test
+	public void testProductoFaltanteException() throws IOException {
+	    Restaurante restaurante = new Restaurante();
+
+	    restaurante.getMenuBase().add(new ProductoMenu("hamburguesa", 10000));
+	    File archivoCombos = File.createTempFile("combo_faltante", ".txt");
+	    PrintWriter writer = new PrintWriter(archivoCombos);
+	    writer.println("ComboTriste;15%;hamburguesa;papa");
+	    writer.close();
+
+	    assertThrows(ProductoFaltanteException.class, () -> {
+	        restaurante.cargarCombos(archivoCombos);
+	    });
+
+	}
+	
+	@Test
+    public void testIngredienteRepetidoException() throws IOException {
+        Restaurante restaurante = new Restaurante();
+
+        File archivoIngredientes = File.createTempFile("ingredientes", ".txt");
+        PrintWriter writer = new PrintWriter(archivoIngredientes);
+        
+        writer.println("lechuga;1000");
+        writer.println("tomate;1000");
+        writer.println("lechuga;1000"); 
+        writer.close();
+
+        assertThrows(IngredienteRepetidoException.class, () -> {
+            restaurante.cargarIngredientes(archivoIngredientes);
+        });
+    }
+	
+	@Test
+    public void testProductoRepetidoException() throws IOException {
+        Restaurante restaurante = new Restaurante();
+
+        File archivoMenu = File.createTempFile("menu", ".txt");
+        PrintWriter writer = new PrintWriter(archivoMenu);
+        
+        writer.println("hamburguesa;5000");
+        writer.println("papas fritas;2000");
+        writer.println("hamburguesa;5000");  // Producto repetido
+        writer.close();
+
+        assertThrows(ProductoRepetidoException.class, () -> {
+            restaurante.cargarMenu(archivoMenu);
+        });
+
+        archivoMenu.deleteOnExit(); // Limpiar archivo temporal
+    }
+	
+
 
 	
 	

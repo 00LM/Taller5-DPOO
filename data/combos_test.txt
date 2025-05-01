@@ -1,0 +1,2 @@
+Combo base;10%;Hamburguesa base;Papas en casco;Manzana postobón
+Combo especial;10%;Hamburguesa especial;Papas en casco;Manzana postobón
