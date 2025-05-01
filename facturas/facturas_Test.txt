@@ -1,0 +1,12 @@
+Dirección: Calle 26
+----------------
+Perro caliente
+            12000
+Combo Combo 1
+ Descuento: 0.1
+            11700
+    +Pepinillos                2500    +Tocineta                4000    -Lechuga    -Mayonesa            21500
+----------------
+Precio Neto:  45200
+IVA:          8588
+Precio Total: 53788

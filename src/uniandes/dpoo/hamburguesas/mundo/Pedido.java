@@ -63,6 +63,11 @@ public class Pedido
     {
         return idPedido;
     }
+    
+    public ArrayList<Producto> getProductosPedido( )
+    {
+        return productos;
+    }
 
     /**
      * Retorna el nombre del cliente

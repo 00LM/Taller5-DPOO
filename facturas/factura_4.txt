@@ -1,0 +1,7 @@
+Cliente: Lina
+Dirección: Ramiriquí
+----------------
+----------------
+Precio Neto:  0
+IVA:          0
+Precio Total: 0
